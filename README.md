@@ -78,6 +78,6 @@ line - description
 
 275 - function getBalance
 
-
+--PLEASE USE THE USER "David@outlook.com" AND THE PASSWORD "password1" TO LOGIN INTO THE BANK "Liv" to access--
 
 
