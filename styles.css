@@ -4,6 +4,90 @@
 html, body {
     height: 100%;
 }
+.individual {
+    height: 100px;
+    padding: 1rem;
+    border-bottom:1px solid gray;
+    background-color: white;
+    border-radius: 25px;
+    margin-bottom: .5rem;
+    box-shadow: 0px 0px 10px .5px hsla(0, 20%, 80%, .5);
+    height: 150px;
+    width: 275px;
+}
+.images {
+    width: 40%;
+    display: inline-block;
+    margin-top: 30px;
+    margin-right: 10px;
+    box-shadow: 0px 0px 10px .5px hsla(0, 20%, 80%, .5);
+    border-radius: 25px;
+
+    padding: 10%;
+}
+.transactionsButton {
+    color: white;
+    background-color: #565d67;
+    border-radius: 35px;
+    height: 100px;
+    border: none;
+    margin-top: 100px;
+}
+.all-in-front {
+    background-color: white;
+    box-shadow: 0px 0px 10px .5px hsla(0, 20%, 80%, .5);
+    border-radius: 25px;
+    padding: 20px;
+    width: 330px;
+}
+.logo {
+    display: inline-block;
+    width: 40%;
+}
+.currency {
+    margin-top: -10px;
+}
+.balance {
+    background-color: white;
+    display: inline-block;
+    border-radius: 25px;
+    height: 130px;
+    width: 40%;
+    padding: 1rem;
+}
+.details {
+    color: black;
+    width: 20%;
+    display: inline-block;
+}
+.amount {
+    width: 20%;
+    display: inline-block;
+}
+.ccode {
+    width: 5%;
+    display: inline-block;
+}
+.span-currency {
+    color: black;
+}
+.button-back {
+    color: white;
+    background-color: #565d67;
+    border-radius: 35px;
+    height: 100px;
+    border: none;
+}
+.title-transactions {
+    color: black;
+}
+.here {
+margin-bottom: 10px;
+}
+.h1 {
+    color: black;
+    width: 150px;
+}
 .card {
     perspective: 150rem;
     position: relative;
@@ -13,9 +97,9 @@ html, body {
     box-shadow: none;
     background: none;
 }
-/*todo el id no se muestra en su totalidad*/
+
 .card-side {
-    height: 35rem;
+    height: 40rem;
     border-radius: 15px;
     transition: all 0.8s ease;
     backface-visibility: hidden;
@@ -24,28 +108,23 @@ html, body {
     left: 0;
     width: 100%;
     padding:2rem;
-    color: white
+    color: darkgray;
 }
-
 .card-side.back {
     transform: rotateY(-180deg);
-    background-color: #4158D0;
-    background-image: linear-gradient(43deg, #4158D0 0%,#C850C0 46%, #FFCC70 100%);
+    background-color: #f5f7fa;
+    /*background-image: linear-gradient(43deg, #4158D0 0%,#C850C0 46%, #FFCC70 100%);*/
 }
-
 .card-side.front {
-    background-color: #0093E9;
-    background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%);
+    background-color: #f5f7fa;
+    /*background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%);*/
 }
-
 .card.rotate .card-side.front {
     transform: rotateY(180deg);
 }
-
 .card.rotate .card-side.back {
     transform: rotateY(0deg);
 }
-
 #preloader {
     display: none;
     position: fixed;
@@ -57,19 +136,13 @@ html, body {
     overflow: hidden;
     background: rgba(255,255,255,.5);
 }
-
 #preloader:before {
     content: "";
     position: fixed;
     top: calc(50% - 30px);
     left: calc(50% - 30px);
-    border: 6px solid chocolate;
+    border: 6px solid #565d67;
     border-radius: 50%;
     width: 60px;
     height: 60px;
-}
-
-
-.transactions {
-    color: red;
 }
