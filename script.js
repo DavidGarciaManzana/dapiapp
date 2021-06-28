@@ -13,6 +13,8 @@ let transactions = ""
 let fromDate = "2020-03-01"
 let toDate = "2020-03-30"
 let balance = ""
+let senderId = ""
+let beneficiaries = ""
 
 
 let handler = Dapi.create({
@@ -48,7 +50,7 @@ let dashboardLogin = () => {
             "password": "Isometrico3000"
         })
     }).then((resp) => {
-            return resp.json()
+        return resp.json()
     }).then((answer) => {
         bearerCode = answer.jwt
         // Activate the following line if you want to create a new user
@@ -100,8 +102,6 @@ const exchangeToken = () => {
     }))
 
 }
-
-
 const getAccounts = () => {
     fetch("https://api.dapi.co/v2/data/accounts/get", {
         method: "POST",
@@ -117,6 +117,7 @@ const getAccounts = () => {
         return resp.json()
     }).then((answer) => {
         bankAccount = answer
+        senderId = bankAccount.accounts[0].id
         bankAccount.accounts.map((account) => {
             const infoInDom = document.createElement("div");
             infoInDom.setAttribute("id", "info");
@@ -130,12 +131,13 @@ const getAccounts = () => {
                         <p>Type: ${account.type}</p>
                         <p>Account Number: ${account.number}</p>
                     </div>
-                    <button class="transactionsButton" id="${account.id}">See transactions</button>
+                    <button class="transactions-button" id="${account.id}">See transactions</button>
+                    <button class="iniciate-transaction-button" id="iniciate">Iniciate Transaction</button>
                   </div>
                   <div class="card-side back">
                     <div class="back-side"></div>
                   </div>
-                </div>        
+                </div>      
                 `;
             document.body.appendChild(infoInDom);
             document.getElementById("info").style.display = "block";
@@ -143,12 +145,22 @@ const getAccounts = () => {
             let accountId = account.id
             getBalance(allInFront, accountId)
         })
-        let buttons = document.querySelectorAll(".transactionsButton")
+        let buttons = document.querySelectorAll(".transactions-button")
         buttons.forEach(button => {
             button.addEventListener("click", showTransaction, false)
-        })}).catch((function (error) {
-            console.log('Error, its impossible to communicate with the server - getAccounts');
-        }))
+        })
+        let buttons2 = document.querySelectorAll(".iniciate-transaction-button")
+        buttons2.forEach(buttonn => {
+            buttonn.addEventListener("click", iniciateNewTransfer, false)
+        })
+    }).catch((function (error) {
+        console.log('Error, its impossible to communicate with the server - getAccounts');
+    }))
+}
+const iniciateNewTransfer = (event) => {
+    let modal = document.querySelector("#open-modal")
+    modal.className = "modal-window open"
+    let beneficiaries = getBeneficiaries()
 }
 const showTransaction = (event) => {
     document.getElementById("preloader").style.display = "block"
@@ -302,4 +314,133 @@ const getBalance = (HTMLElement, accountId) => {
     }))
 }
 
+const initiateTransfer = () => {
+    let amount = document.getElementById("transfer-amount")
+    if (amount.value == "") {
+        alert("Please insert a valid amount")
+        return false
+    }
 
+    let beneficiary = beneficiaries.filter(beneficiary => beneficiary.id === document.getElementById("beneficiary-data").value)[0]
+    fetch("https://api.dapi.co/v2/payment/transfer/autoflow", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + accessToken,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "appSecret": appSecret,
+            "userSecret": userSecret,
+            "amount": parseInt(amount.value),
+            "senderID": senderId,
+            "userInputs": [
+                {
+                    "answer": "123456",
+                    "id": "otp",
+                    "index": 0,
+                    "query": "Please enter a Smart Pass Token from your ENBD mobile application"
+                }
+            ],
+            "beneficiary": {
+                "name": "Jonh Doe",
+                "address": {
+                    "line1": "Baker Street",
+                    "line2": "Abu Dhabi",
+                    "line3": "United Arab Emirates"
+                },
+                "country": "AE",
+                "branchAddress": "Deira",
+                "branchName": "Main Branch",
+                "swiftCode": "FGBMAEAA",
+                "iban": beneficiary.iban,
+                "accountNumber": beneficiary.accountNumber,
+                "bankName": "ENBD"
+            }
+        })
+    }).then((resp) => {
+        return resp.json()
+    }).then((answer) => {
+        if (answer.success == true && typeof answer.reference != "undefined") {
+            document.getElementById("modal-content").innerHTML = `<h3 class="h3">Succesfull transfer</h3><div class="reference">Reference: ${answer.reference}</div>`
+            document.getElementById("modal-title").innerHTML = `<div class="transfer-status">Transfer Status</div>`
+        } else {
+            document.getElementById("modal-content").innerHTML = `<div>Transfer Failed</div>`
+            document.getElementById("modal-title").innerHTML = `<div class="transfer-status">Transfer Status</div>`
+        }
+    }).catch((function (error) {
+        console.log('Error, its impossible to communicate with the server - Initiate transfer');
+    }))
+}
+
+
+const getBeneficiaries = () => {
+    fetch("https://api.dapi.co/v2/payment/beneficiaries/get", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + accessToken,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "appSecret": appSecret,
+            "userSecret": userSecret
+        })
+    }).then((resp) => {
+        return resp.json()
+    }).then((answer) => {
+        let options = ""
+        answer.beneficiaries.map((beneficiary) => {
+            options += `<option value="${beneficiary.id}">${beneficiary.name}</option>`
+        })
+        document.getElementById("modal-content").innerHTML = `
+            <label for="beneficiary-data" class="contact-label">Contact: </label>
+            <select name="options" id="beneficiary-data" class="select-beneficiary">
+               ${options} 
+            </select>
+            <label for="transfer-amount">Amount: </label>
+            <input type="number" id="transfer-amount" placeholder="AED">
+            <button id="button-transfer">Transfer</button>
+            `
+        beneficiaries = answer.beneficiaries
+
+        document.getElementById("button-transfer").addEventListener("click", initiateTransfer, false)
+    }).catch((function (error) {
+        console.log('Error, its impossible to communicate with the server - Get Beneficiaries');
+    }))
+}
+
+const createBeneficiaries = () => {
+    fetch("https://api.dapi.co/v2/payment/beneficiaries/create", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + accessToken,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "appSecret": appSecret,
+            "userSecret": userSecret,
+            "type": "local",
+            "swiftCode": "321",
+            "sortCode": "123",
+            "bankName": "Liv Sandbox",
+            "name": "RealSuperman",
+            "iban": "DAPIBANKAELIV1624307853549914811241",
+            "accountNumber": "1624307853549914811241",
+            "country": "AE",
+            "branchName": "aaa",
+            "branchAddress": "bbb",
+            "address": {
+                "line1": "ccc",
+                "line2": "ddd",
+                "line3": "eee"
+            }
+        })
+    }).then((resp) => {
+        return resp.json()
+    }).then((answer) => {
+    }).catch((function (error) {
+        console.log('Error, its impossible to communicate with the server - Create Beneficiarie');
+    }))
+}
+document.querySelector(".modal-close").addEventListener("click", function () {
+    document.querySelector(".modal-window").className = "modal-window"
+}, false)
